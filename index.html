@@ -1,804 +1,1883 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Uros Slavic — Video Editor</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
+
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Bebas+Neue&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+
 <style>
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+
+
   :root {
+
     --black: #080808;
+
     --white: #f0ede8;
+
     --gold: #c9a84c;
+
     --gold-dim: #8a6e2f;
+
     --grey: #1a1a1a;
+
     --grey-mid: #2e2e2e;
+
     --text-dim: #888;
+
   }
+
+
 
   html { scroll-behavior: smooth; }
 
+
+
   body {
+
     background: var(--black);
+
     color: var(--white);
+
     font-family: 'Cormorant Garamond', Georgia, serif;
+
     overflow-x: hidden;
+
     cursor: none;
+
   }
 
-  /* Custom cursor */
+
+
   .cursor {
+
     position: fixed;
+
     width: 8px; height: 8px;
+
     background: var(--gold);
+
     border-radius: 50%;
+
     pointer-events: none;
+
     z-index: 9999;
+
     transform: translate(-50%, -50%);
+
     transition: transform 0.1s ease;
-  }
-  .cursor-ring {
-    position: fixed;
-    width: 36px; height: 36px;
-    border: 1px solid rgba(201,168,76,0.4);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    transform: translate(-50%, -50%);
-    transition: all 0.18s ease;
+
   }
 
-  /* Noise overlay */
-  body::before {
-    content: '';
+  .cursor-ring {
+
     position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+
+    width: 36px; height: 36px;
+
+    border: 1px solid rgba(201,168,76,0.4);
+
+    border-radius: 50%;
+
     pointer-events: none;
-    z-index: 9997;
-    opacity: 0.35;
+
+    z-index: 9998;
+
+    transform: translate(-50%, -50%);
+
+    transition: all 0.18s ease;
+
   }
+
+
+
+  body::before {
+
+    content: '';
+
+    position: fixed;
+
+    inset: 0;
+
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+
+    pointer-events: none;
+
+    z-index: 9997;
+
+    opacity: 0.35;
+
+  }
+
+
 
   /* NAV */
+
   nav {
+
     position: fixed;
+
     top: 0; left: 0; right: 0;
+
     padding: 28px 48px;
+
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
+
     z-index: 100;
-    mix-blend-mode: normal;
+
   }
+
   nav::after {
+
     content: '';
+
     position: absolute;
+
     inset: 0;
+
     background: linear-gradient(to bottom, rgba(8,8,8,0.95), transparent);
+
     z-index: -1;
+
   }
+
   .nav-logo {
+
     font-family: 'Bebas Neue', sans-serif;
+
     font-size: 1.1rem;
+
     letter-spacing: 0.25em;
+
     color: var(--gold);
+
     text-decoration: none;
+
   }
+
   .nav-links {
+
     display: flex;
+
     gap: 40px;
+
     list-style: none;
+
   }
+
   .nav-links a {
+
     font-family: 'DM Mono', monospace;
+
     font-size: 0.65rem;
+
     letter-spacing: 0.2em;
+
     text-transform: uppercase;
+
     color: var(--text-dim);
+
     text-decoration: none;
+
     transition: color 0.3s;
+
   }
+
   .nav-links a:hover { color: var(--gold); }
 
+
+
   /* HERO */
+
   .hero {
+
     min-height: 100vh;
+
     display: flex;
+
     flex-direction: column;
+
     justify-content: flex-end;
+
     padding: 0 48px 80px;
+
     position: relative;
+
     overflow: hidden;
+
   }
 
   .hero-bg {
+
     position: absolute;
+
     inset: 0;
-    background: 
+
+    background:
+
       radial-gradient(ellipse 60% 50% at 70% 40%, rgba(201,168,76,0.06) 0%, transparent 70%),
+
       radial-gradient(ellipse 40% 60% at 20% 80%, rgba(201,168,76,0.04) 0%, transparent 60%);
+
   }
 
   .hero-line {
+
     position: absolute;
+
     top: 0; right: 120px;
-    width: 1px;
-    height: 100vh;
+
+    width: 1px; height: 100vh;
+
     background: linear-gradient(to bottom, transparent, rgba(201,168,76,0.15), transparent);
+
   }
 
   .hero-counter {
+
     font-family: 'DM Mono', monospace;
+
     font-size: 0.6rem;
+
     letter-spacing: 0.3em;
+
     color: var(--gold-dim);
+
     margin-bottom: 32px;
+
     opacity: 0;
+
     animation: fadeUp 1s 0.3s forwards;
+
   }
 
   .hero-title {
+
     font-family: 'Bebas Neue', sans-serif;
+
     font-size: clamp(72px, 12vw, 160px);
+
     line-height: 0.9;
+
     letter-spacing: 0.02em;
+
     opacity: 0;
+
     animation: fadeUp 1s 0.5s forwards;
+
   }
 
   .hero-title .name-first { display: block; color: var(--white); }
+
   .hero-title .name-last {
+
     display: block;
+
     color: transparent;
+
     -webkit-text-stroke: 1px rgba(201,168,76,0.6);
+
   }
 
   .hero-sub {
+
     margin-top: 32px;
+
     display: flex;
+
     align-items: center;
+
     gap: 24px;
+
     opacity: 0;
+
     animation: fadeUp 1s 0.7s forwards;
+
   }
-  .hero-sub-line {
-    width: 60px; height: 1px;
-    background: var(--gold-dim);
-  }
+
+  .hero-sub-line { width: 60px; height: 1px; background: var(--gold-dim); }
+
   .hero-sub p {
+
     font-family: 'Cormorant Garamond', serif;
+
     font-style: italic;
+
     font-size: 1.1rem;
+
     color: var(--text-dim);
+
     letter-spacing: 0.05em;
+
   }
 
   .hero-scroll {
+
     position: absolute;
+
     bottom: 40px; right: 48px;
+
     font-family: 'DM Mono', monospace;
+
     font-size: 0.55rem;
+
     letter-spacing: 0.3em;
+
     color: var(--text-dim);
+
     writing-mode: vertical-rl;
+
     display: flex;
+
     align-items: center;
+
     gap: 12px;
+
     opacity: 0;
+
     animation: fadeUp 1s 1.2s forwards;
+
   }
+
   .hero-scroll::before {
+
     content: '';
+
     display: block;
-    width: 1px;
-    height: 48px;
+
+    width: 1px; height: 48px;
+
     background: linear-gradient(to bottom, var(--gold-dim), transparent);
+
     animation: scrollLine 2s 2s infinite;
+
   }
 
-  /* REEL SECTION */
-  .reel {
-    padding: 80px 48px;
-    position: relative;
-  }
-  .reel-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.3em;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 24px;
-  }
-  .reel-frame {
-    width: 100%;
-    aspect-ratio: 16/9;
-    background: var(--grey);
-    border: 1px solid var(--grey-mid);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    cursor: none;
-  }
-  .reel-frame::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(201,168,76,0.03) 0%, transparent 50%);
-  }
-  .reel-placeholder {
-    text-align: center;
-  }
-  .reel-placeholder .play-btn {
-    width: 72px; height: 72px;
-    border: 1px solid rgba(201,168,76,0.4);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    transition: all 0.3s;
-  }
-  .reel-frame:hover .play-btn {
-    border-color: var(--gold);
-    background: rgba(201,168,76,0.08);
-    transform: scale(1.1);
-  }
-  .play-btn svg { fill: var(--gold); margin-left: 4px; }
-  .reel-placeholder p {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    color: var(--text-dim);
-  }
 
-  /* WORK SECTION */
-  .work {
-    padding: 80px 48px;
-  }
+
+  /* SHARED */
+
   .section-header {
+
     display: flex;
+
     align-items: baseline;
+
     gap: 24px;
-    margin-bottom: 64px;
+
+    margin-bottom: 48px;
+
   }
+
   .section-number {
+
     font-family: 'DM Mono', monospace;
+
     font-size: 0.6rem;
+
     color: var(--gold-dim);
+
     letter-spacing: 0.2em;
+
   }
+
   .section-title {
+
     font-family: 'Bebas Neue', sans-serif;
+
     font-size: clamp(36px, 5vw, 64px);
+
     letter-spacing: 0.05em;
+
     color: var(--white);
+
   }
+
   .section-line {
-    flex: 1;
-    height: 1px;
+
+    flex: 1; height: 1px;
+
     background: var(--grey-mid);
+
     margin-left: 16px;
+
   }
+
+
+
+  /* WORK */
+
+  .work { padding: 80px 48px; }
+
+
+
+  .work-sub-label {
+
+    font-family: 'DM Mono', monospace;
+
+    font-size: 0.58rem;
+
+    letter-spacing: 0.3em;
+
+    color: var(--gold);
+
+    text-transform: uppercase;
+
+    margin-bottom: 16px;
+
+  }
+
+
 
   .work-grid {
+
     display: grid;
+
     grid-template-columns: repeat(12, 1fr);
+
     gap: 2px;
+
+    margin-bottom: 48px;
+
   }
+
+
 
   .work-item {
+
     position: relative;
+
     overflow: hidden;
+
     background: var(--grey);
+
     cursor: none;
+
   }
-  .work-item:nth-child(1) { grid-column: span 7; aspect-ratio: 16/10; }
-  .work-item:nth-child(2) { grid-column: span 5; aspect-ratio: 4/3; }
-  .work-item:nth-child(3) { grid-column: span 5; aspect-ratio: 4/3; }
-  .work-item:nth-child(4) { grid-column: span 7; aspect-ratio: 16/10; }
-  .work-item:nth-child(5) { grid-column: span 12; aspect-ratio: 21/7; }
+
+
+
+  .ecom-grid .work-item:nth-child(1) { grid-column: span 7; aspect-ratio: 16/10; }
+
+  .ecom-grid .work-item:nth-child(2) { grid-column: span 5; aspect-ratio: 4/3; }
+
+  .ecom-grid .work-item:nth-child(3) { grid-column: span 5; aspect-ratio: 4/3; }
+
+  .ecom-grid .work-item:nth-child(4) { grid-column: span 7; aspect-ratio: 16/10; }
+
+  .longform-grid .work-item { grid-column: span 4; aspect-ratio: 16/10; }
+
+
 
   .work-item-inner {
+
     position: absolute;
+
     inset: 0;
+
     background: linear-gradient(135deg, #1a1a1a, #111);
+
     display: flex;
+
     align-items: flex-end;
+
     padding: 28px;
+
     transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
   }
+
   .work-item:hover .work-item-inner { transform: scale(1.03); }
 
-  .work-item-overlay {
+
+
+  .work-bg-label {
+
     position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(8,8,8,0.9) 0%, transparent 60%);
-    opacity: 0;
-    transition: opacity 0.4s;
+
+    top: 50%; left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    opacity: 0.04;
+
+    font-family: 'Bebas Neue', sans-serif;
+
+    font-size: 80px;
+
+    letter-spacing: 0.1em;
+
+    color: var(--white);
+
+    white-space: nowrap;
+
+    z-index: 1;
+
+    pointer-events: none;
+
   }
+
+
+
+  .work-play-icon {
+
+    position: absolute;
+
+    top: 50%; left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    width: 56px; height: 56px;
+
+    border: 1px solid rgba(201,168,76,0.35);
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition: all 0.3s;
+
+    z-index: 3;
+
+  }
+
+  .work-play-icon svg { fill: rgba(201,168,76,0.55); margin-left: 3px; }
+
+  .work-item:hover .work-play-icon {
+
+    border-color: var(--gold);
+
+    background: rgba(201,168,76,0.1);
+
+    transform: translate(-50%, -50%) scale(1.12);
+
+  }
+
+  .work-item:hover .work-play-icon svg { fill: var(--gold); }
+
+
+
+  .work-item-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    background: linear-gradient(to top, rgba(8,8,8,0.9) 0%, transparent 60%);
+
+    opacity: 0;
+
+    transition: opacity 0.4s;
+
+  }
+
   .work-item:hover .work-item-overlay { opacity: 1; }
 
+
+
   .work-item-info {
+
     position: relative;
+
     z-index: 2;
+
     transform: translateY(8px);
+
     opacity: 0;
+
     transition: all 0.4s;
-  }
-  .work-item:hover .work-item-info {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  .work-item-tag {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.55rem;
-    letter-spacing: 0.25em;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .work-item-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.3rem;
-    font-weight: 300;
-    color: var(--white);
+
   }
 
-  .work-placeholder-icon {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0.06;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 80px;
-    letter-spacing: 0.1em;
-    color: var(--white);
-    white-space: nowrap;
+  .work-item:hover .work-item-info { transform: translateY(0); opacity: 1; }
+
+  .work-item-tag {
+
+    font-family: 'DM Mono', monospace;
+
+    font-size: 0.55rem;
+
+    letter-spacing: 0.25em;
+
+    color: var(--gold);
+
+    text-transform: uppercase;
+
+    margin-bottom: 6px;
+
   }
+
+  .work-item-name {
+
+    font-family: 'Cormorant Garamond', serif;
+
+    font-size: 1.3rem;
+
+    font-weight: 300;
+
+    color: var(--white);
+
+  }
+
+
+
+  /* VIDEO MODAL */
+
+  .modal-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,0.97);
+
+    z-index: 10000;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: opacity 0.3s;
+
+  }
+
+  .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+  .modal-inner { width: 90%; max-width: 960px; position: relative; }
+
+  .modal-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 16px;
+
+  }
+
+  .modal-title-wrap { display: flex; align-items: baseline; gap: 14px; }
+
+  .modal-title {
+
+    font-family: 'Bebas Neue', sans-serif;
+
+    font-size: 22px;
+
+    letter-spacing: 0.1em;
+
+    color: var(--white);
+
+  }
+
+  .modal-tag {
+
+    font-family: 'DM Mono', monospace;
+
+    font-size: 0.55rem;
+
+    letter-spacing: 0.2em;
+
+    color: var(--gold-dim);
+
+    text-transform: uppercase;
+
+  }
+
+  .modal-close {
+
+    font-family: 'DM Mono', monospace;
+
+    font-size: 0.6rem;
+
+    letter-spacing: 0.2em;
+
+    color: var(--text-dim);
+
+    cursor: pointer;
+
+    background: none;
+
+    border: none;
+
+    transition: color 0.3s;
+
+    text-transform: uppercase;
+
+  }
+
+  .modal-close:hover { color: var(--gold); cursor: none; }
+
+  .modal-video {
+
+    width: 100%;
+
+    aspect-ratio: 16/9;
+
+    background: var(--grey);
+
+    border: 1px solid var(--grey-mid);
+
+  }
+
+  .modal-video iframe { width: 100%; height: 100%; border: none; }
+
+
 
   /* ABOUT */
+
   .about {
+
     padding: 80px 48px;
+
     display: grid;
+
     grid-template-columns: 1fr 1fr;
+
     gap: 80px;
+
     align-items: center;
+
+    border-top: 1px solid var(--grey-mid);
+
   }
-  .about-left {}
+
   .about-quote {
+
     font-family: 'Cormorant Garamond', serif;
+
     font-style: italic;
+
     font-size: clamp(24px, 3vw, 38px);
+
     font-weight: 300;
+
     line-height: 1.4;
+
     color: var(--white);
+
     margin-bottom: 40px;
+
   }
+
   .about-quote span { color: var(--gold); }
+
   .about-body {
+
     font-family: 'DM Mono', monospace;
+
     font-size: 0.7rem;
+
     line-height: 1.9;
+
     color: var(--text-dim);
+
     letter-spacing: 0.05em;
+
   }
-  .about-right {}
+
   .about-stats {
+
     display: grid;
+
     grid-template-columns: 1fr 1fr;
+
     gap: 2px;
+
   }
+
   .stat-box {
+
     background: var(--grey);
+
     padding: 36px 28px;
+
     border: 1px solid transparent;
+
     transition: border-color 0.3s;
+
   }
+
   .stat-box:hover { border-color: var(--grey-mid); }
+
   .stat-number {
+
     font-family: 'Bebas Neue', sans-serif;
+
     font-size: 52px;
+
     color: var(--gold);
+
     line-height: 1;
+
     margin-bottom: 8px;
+
   }
+
   .stat-label {
+
     font-family: 'DM Mono', monospace;
+
     font-size: 0.55rem;
+
     letter-spacing: 0.2em;
+
     color: var(--text-dim);
+
     text-transform: uppercase;
+
   }
+
+
+
+  /* WHY ME */
+
+  .why-me {
+
+    padding: 80px 48px;
+
+    border-top: 1px solid var(--grey-mid);
+
+  }
+
+  .why-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 2px;
+
+    margin-top: 0;
+
+  }
+
+  .why-item {
+
+    padding: 44px 36px;
+
+    background: var(--grey);
+
+    position: relative;
+
+    overflow: hidden;
+
+    transition: background 0.3s;
+
+  }
+
+  .why-item:hover { background: #1e1e1e; }
+
+  .why-item::before {
+
+    content: '';
+
+    position: absolute;
+
+    top: 0; left: 0;
+
+    width: 0; height: 2px;
+
+    background: var(--gold);
+
+    transition: width 0.5s;
+
+  }
+
+  .why-item:hover::before { width: 100%; }
+
+  .why-num {
+
+    font-family: 'Bebas Neue', sans-serif;
+
+    font-size: 44px;
+
+    color: var(--grey-mid);
+
+    line-height: 1;
+
+    margin-bottom: 18px;
+
+    transition: color 0.3s;
+
+  }
+
+  .why-item:hover .why-num { color: var(--gold-dim); }
+
+  .why-title {
+
+    font-family: 'Bebas Neue', sans-serif;
+
+    font-size: 22px;
+
+    letter-spacing: 0.08em;
+
+    color: var(--white);
+
+    margin-bottom: 14px;
+
+  }
+
+  .why-desc {
+
+    font-family: 'DM Mono', monospace;
+
+    font-size: 0.62rem;
+
+    line-height: 1.85;
+
+    color: var(--text-dim);
+
+    letter-spacing: 0.04em;
+
+  }
+
+
 
   /* SKILLS */
+
   .skills {
+
     padding: 80px 48px;
+
     border-top: 1px solid var(--grey-mid);
-  }
-  .skills-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-    margin-top: 0;
-  }
-  .skill-item {
-    padding: 40px 32px;
-    background: var(--grey);
-    position: relative;
-    overflow: hidden;
-    transition: background 0.3s;
-  }
-  .skill-item:hover { background: #202020; }
-  .skill-item::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 2px;
-    height: 0;
-    background: var(--gold);
-    transition: height 0.4s;
-  }
-  .skill-item:hover::before { height: 100%; }
-  .skill-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 0.08em;
-    color: var(--white);
-    margin-bottom: 12px;
-  }
-  .skill-desc {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    line-height: 1.8;
-    color: var(--text-dim);
-    letter-spacing: 0.05em;
+
   }
 
-  /* CONTACT */
-  .contact {
-    padding: 120px 48px;
-    text-align: center;
+  .skills-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 2px;
+
+  }
+
+  .skill-item {
+
+    padding: 40px 32px;
+
+    background: var(--grey);
+
     position: relative;
+
+    overflow: hidden;
+
+    transition: background 0.3s;
+
   }
-  .contact::before {
+
+  .skill-item:hover { background: #202020; }
+
+  .skill-item::before {
+
     content: '';
+
     position: absolute;
-    top: 0; left: 10%; right: 10%;
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--grey-mid), transparent);
+
+    top: 0; left: 0;
+
+    width: 2px; height: 0;
+
+    background: var(--gold);
+
+    transition: height 0.4s;
+
   }
-  .contact-pre {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.3em;
-    color: var(--gold-dim);
-    margin-bottom: 28px;
-  }
-  .contact-title {
+
+  .skill-item:hover::before { height: 100%; }
+
+  .skill-name {
+
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(48px, 8vw, 100px);
-    letter-spacing: 0.03em;
-    line-height: 1;
+
+    font-size: 22px;
+
+    letter-spacing: 0.08em;
+
     color: var(--white);
+
+    margin-bottom: 12px;
+
+  }
+
+  .skill-desc {
+
+    font-family: 'DM Mono', monospace;
+
+    font-size: 0.6rem;
+
+    line-height: 1.8;
+
+    color: var(--text-dim);
+
+    letter-spacing: 0.05em;
+
+  }
+
+
+
+  /* CONTACT */
+
+  .contact {
+
+    padding: 120px 48px;
+
+    text-align: center;
+
+    position: relative;
+
+  }
+
+  .contact::before {
+
+    content: '';
+
+    position: absolute;
+
+    top: 0; left: 10%; right: 10%;
+
+    height: 1px;
+
+    background: linear-gradient(to right, transparent, var(--grey-mid), transparent);
+
+  }
+
+  .contact-pre {
+
+    font-family: 'DM Mono', monospace;
+
+    font-size: 0.6rem;
+
+    letter-spacing: 0.3em;
+
+    color: var(--gold-dim);
+
+    margin-bottom: 28px;
+
+  }
+
+  .contact-title {
+
+    font-family: 'Bebas Neue', sans-serif;
+
+    font-size: clamp(48px, 8vw, 100px);
+
+    letter-spacing: 0.03em;
+
+    line-height: 1;
+
+    color: var(--white);
+
     margin-bottom: 48px;
+
   }
+
   .contact-title span {
+
     color: transparent;
+
     -webkit-text-stroke: 1px rgba(201,168,76,0.5);
+
   }
+
   .contact-email {
+
     display: inline-block;
+
     font-family: 'Cormorant Garamond', serif;
+
     font-style: italic;
+
     font-size: clamp(20px, 2.5vw, 28px);
+
     color: var(--gold);
+
     text-decoration: none;
+
     border-bottom: 1px solid rgba(201,168,76,0.3);
+
     padding-bottom: 4px;
+
     transition: border-color 0.3s;
+
     cursor: none;
+
   }
+
   .contact-email:hover { border-color: var(--gold); }
 
   .contact-socials {
+
     margin-top: 64px;
+
     display: flex;
+
     justify-content: center;
+
     gap: 48px;
+
   }
+
   .social-link {
+
     font-family: 'DM Mono', monospace;
+
     font-size: 0.6rem;
+
     letter-spacing: 0.2em;
+
     color: var(--text-dim);
+
     text-decoration: none;
+
     text-transform: uppercase;
+
     transition: color 0.3s;
+
     cursor: none;
+
   }
+
   .social-link:hover { color: var(--gold); }
 
-  /* FOOTER */
+
+
   footer {
+
     padding: 28px 48px;
+
     border-top: 1px solid var(--grey-mid);
+
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
-  }
-  footer p {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.55rem;
-    letter-spacing: 0.15em;
-    color: var(--text-dim);
+
   }
 
-  /* ANIMATIONS */
+  footer p {
+
+    font-family: 'DM Mono', monospace;
+
+    font-size: 0.55rem;
+
+    letter-spacing: 0.15em;
+
+    color: var(--text-dim);
+
+  }
+
+
+
   @keyframes fadeUp {
+
     from { opacity: 0; transform: translateY(30px); }
+
     to { opacity: 1; transform: translateY(0); }
+
   }
+
   @keyframes scrollLine {
+
     0%, 100% { opacity: 1; }
+
     50% { opacity: 0.2; }
+
   }
+
+
 
   .reveal {
+
     opacity: 0;
+
     transform: translateY(40px);
+
     transition: opacity 0.8s ease, transform 0.8s ease;
-  }
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
+
   }
 
-  /* MOBILE */
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+
+
   @media (max-width: 768px) {
+
     nav { padding: 20px 24px; }
+
     .nav-links { display: none; }
+
     .hero { padding: 0 24px 60px; }
-    .reel, .work, .about, .skills, .contact { padding: 60px 24px; }
+
+    .work, .about, .skills, .why-me, .contact { padding: 60px 24px; }
+
     .about { grid-template-columns: 1fr; gap: 48px; }
-    .skills-grid { grid-template-columns: 1fr; }
-    .work-item:nth-child(1),
-    .work-item:nth-child(2),
-    .work-item:nth-child(3),
-    .work-item:nth-child(4),
-    .work-item:nth-child(5) { grid-column: span 12; }
+
+    .skills-grid, .why-grid { grid-template-columns: 1fr; }
+
+    .ecom-grid .work-item { grid-column: span 12 !important; aspect-ratio: 16/9 !important; }
+
+    .longform-grid .work-item { grid-column: span 12 !important; aspect-ratio: 16/9 !important; }
+
     footer { flex-direction: column; gap: 12px; text-align: center; }
+
     .cursor, .cursor-ring { display: none; }
+
     body { cursor: auto; }
+
     a, button { cursor: pointer; }
+
+    .modal-inner { width: 95%; }
+
   }
+
 </style>
+
 </head>
+
 <body>
 
+
+
 <div class="cursor" id="cursor"></div>
+
 <div class="cursor-ring" id="cursorRing"></div>
 
+
+
+<!-- VIDEO MODAL -->
+
+<div class="modal-overlay" id="videoModal">
+
+  <div class="modal-inner">
+
+    <div class="modal-header">
+
+      <div class="modal-title-wrap">
+
+        <span class="modal-title" id="modalTitle"></span>
+
+        <span class="modal-tag" id="modalTag"></span>
+
+      </div>
+
+      <button class="modal-close" id="modalClose">✕ Close</button>
+
+    </div>
+
+    <div class="modal-video">
+
+      <iframe id="modalIframe" src="" allowfullscreen allow="autoplay"></iframe>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
 <nav>
+
   <a href="#" class="nav-logo">US</a>
+
   <ul class="nav-links">
+
     <li><a href="#work">Work</a></li>
+
     <li><a href="#about">About</a></li>
+
+    <li><a href="#why">Why Me</a></li>
+
     <li><a href="#contact">Contact</a></li>
+
   </ul>
+
 </nav>
 
+
+
 <!-- HERO -->
+
 <section class="hero">
+
   <div class="hero-bg"></div>
+
   <div class="hero-line"></div>
-  <div class="hero-counter">Video Editor — Ecom & Direct Response</div>
+
+  <div class="hero-counter">Video Editor — Scaling Ecom Brands</div>
+
   <h1 class="hero-title">
+
     <span class="name-first">Uros</span>
+
     <span class="name-last">Slavic</span>
+
   </h1>
+
   <div class="hero-sub">
+
     <div class="hero-sub-line"></div>
+
     <p>Ads that stop the scroll. Content that converts.</p>
+
   </div>
+
   <div class="hero-scroll">Scroll</div>
+
 </section>
 
-<!-- REEL -->
-<section class="reel reveal" id="reel">
-  <div class="reel-label">// Showreel 2025</div>
-  <div class="reel-frame">
-    <div class="reel-placeholder">
-      <div class="play-btn">
-        <svg width="18" height="20" viewBox="0 0 18 20"><path d="M0 0L18 10L0 20V0Z"/></svg>
-      </div>
-      <p>SHOWREEL — ADD YOUR VIDEO LINK HERE</p>
-    </div>
-  </div>
-</section>
+
 
 <!-- WORK -->
+
 <section class="work" id="work">
+
   <div class="section-header reveal">
+
     <span class="section-number">01</span>
+
     <h2 class="section-title">Selected Work</h2>
+
     <div class="section-line"></div>
+
   </div>
 
-  <div class="work-grid">
-    <div class="work-item reveal">
+
+
+  <div class="work-sub-label reveal">// Ecom Ads</div>
+
+  <div class="work-grid ecom-grid">
+
+    <div class="work-item reveal" onclick="openModal('High Production Ad', 'Paid Social', '1YyE4YQe_ljazi92Fay2wn1Tr042fCDsY')">
+
       <div class="work-item-inner">
-        <div class="work-placeholder-icon">HEALTH</div>
+
+        <div class="work-bg-label">PAID</div>
+
+        <div class="work-play-icon"><svg width="14" height="16" viewBox="0 0 14 16"><path d="M0 0L14 8L0 16V0Z"/></svg></div>
+
         <div class="work-item-overlay"></div>
+
         <div class="work-item-info">
-          <div class="work-item-tag">Health & Wellness</div>
-          <div class="work-item-name">Eye Care Brand — UGC Ad</div>
+
+          <div class="work-item-tag">Paid Social</div>
+
+          <div class="work-item-name">High Production Ad</div>
+
         </div>
+
       </div>
+
     </div>
-    <div class="work-item reveal">
+
+    <div class="work-item reveal" onclick="openModal('Organic Ad', 'Organic Content', '1LAyT8aBPpIXXuopliP5lwXjJJ0vSnDDI')">
+
       <div class="work-item-inner">
-        <div class="work-placeholder-icon">ECOM</div>
+
+        <div class="work-bg-label">ORGANIC</div>
+
+        <div class="work-play-icon"><svg width="14" height="16" viewBox="0 0 14 16"><path d="M0 0L14 8L0 16V0Z"/></svg></div>
+
         <div class="work-item-overlay"></div>
+
         <div class="work-item-info">
-          <div class="work-item-tag">Ecommerce</div>
-          <div class="work-item-name">Product Launch Ad</div>
+
+          <div class="work-item-tag">Organic Content</div>
+
+          <div class="work-item-name">Organic Ad</div>
+
         </div>
+
       </div>
+
     </div>
-    <div class="work-item reveal">
+
+    <div class="work-item reveal" onclick="openModal('Saddle Brand', 'Brand Content', '1j2hBe5q9kSkuewmytLSGtoVgQTF69OaF')">
+
       <div class="work-item-inner">
-        <div class="work-placeholder-icon">BRAND</div>
+
+        <div class="work-bg-label">BRAND</div>
+
+        <div class="work-play-icon"><svg width="14" height="16" viewBox="0 0 14 16"><path d="M0 0L14 8L0 16V0Z"/></svg></div>
+
         <div class="work-item-overlay"></div>
+
         <div class="work-item-info">
+
           <div class="work-item-tag">Brand Content</div>
-          <div class="work-item-name">Social Media Campaign</div>
+
+          <div class="work-item-name">Saddle Brand</div>
+
         </div>
+
       </div>
+
     </div>
-    <div class="work-item reveal">
+
+    <div class="work-item reveal" onclick="openModal('UGC Ad', 'UGC Creative', '1_BJggzsQGb6QfGCedCPBkz8aZHuTPTrl')">
+
       <div class="work-item-inner">
-        <div class="work-placeholder-icon">DTC</div>
+
+        <div class="work-bg-label">UGC</div>
+
+        <div class="work-play-icon"><svg width="14" height="16" viewBox="0 0 14 16"><path d="M0 0L14 8L0 16V0Z"/></svg></div>
+
         <div class="work-item-overlay"></div>
+
         <div class="work-item-info">
-          <div class="work-item-tag">DTC Brand</div>
-          <div class="work-item-name">Performance Creative</div>
+
+          <div class="work-item-tag">UGC Creative</div>
+
+          <div class="work-item-name">UGC Ad</div>
+
         </div>
+
       </div>
+
     </div>
-    <div class="work-item reveal">
-      <div class="work-item-inner">
-        <div class="work-placeholder-icon">REEL</div>
-        <div class="work-item-overlay"></div>
-        <div class="work-item-info">
-          <div class="work-item-tag">Showreel</div>
-          <div class="work-item-name">Best Of 2025</div>
-        </div>
-      </div>
-    </div>
+
   </div>
+
+
+
+  <div class="work-sub-label reveal">// Video Editing</div>
+
+  <div class="work-grid longform-grid">
+
+    <div class="work-item reveal" onclick="openModal('Video Edit — 01', 'Long Form', '1CeDx8p4Jpz7dCCW5iZiB6ACjReyZBr54')">
+
+      <div class="work-item-inner">
+
+        <div class="work-bg-label">EDIT</div>
+
+        <div class="work-play-icon"><svg width="14" height="16" viewBox="0 0 14 16"><path d="M0 0L14 8L0 16V0Z"/></svg></div>
+
+        <div class="work-item-overlay"></div>
+
+        <div class="work-item-info">
+
+          <div class="work-item-tag">Long Form</div>
+
+          <div class="work-item-name">Video Edit — 01</div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="work-item reveal" onclick="openModal('Video Edit — 02', 'Long Form', '18FzE44MmJ3WRDjpJwJXZs2CMCMmngipc')">
+
+      <div class="work-item-inner">
+
+        <div class="work-bg-label">EDIT</div>
+
+        <div class="work-play-icon"><svg width="14" height="16" viewBox="0 0 14 16"><path d="M0 0L14 8L0 16V0Z"/></svg></div>
+
+        <div class="work-item-overlay"></div>
+
+        <div class="work-item-info">
+
+          <div class="work-item-tag">Long Form</div>
+
+          <div class="work-item-name">Video Edit — 02</div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="work-item reveal" onclick="openModal('Video Edit — 03', 'Long Form', '1_k54X-odM0LoDPuBghuNdM3AyUbQHTar')">
+
+      <div class="work-item-inner">
+
+        <div class="work-bg-label">EDIT</div>
+
+        <div class="work-play-icon"><svg width="14" height="16" viewBox="0 0 14 16"><path d="M0 0L14 8L0 16V0Z"/></svg></div>
+
+        <div class="work-item-overlay"></div>
+
+        <div class="work-item-info">
+
+          <div class="work-item-tag">Long Form</div>
+
+          <div class="work-item-name">Video Edit — 03</div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </section>
+
+
 
 <!-- ABOUT -->
+
 <section class="about" id="about">
+
   <div class="about-left reveal">
+
     <div class="section-header" style="margin-bottom:40px">
+
       <span class="section-number">02</span>
+
       <h2 class="section-title">About</h2>
+
     </div>
+
     <p class="about-quote">
-      I edit ads that make people <span>stop, watch,</span> and buy.
+
+      I don't just edit — I help brands <span>scale</span> with creative that converts.
+
     </p>
+
     <p class="about-body">
-      Specializing in direct response video for ecommerce brands. I understand the psychology of the scroll — what stops someone, what keeps them watching, what makes them click.<br><br>
-      From UGC-style content to cinematic brand films, I bring a strategic eye to every cut. Every transition, every second of pacing — built with one goal in mind: conversion.
+
+      I'm a video editor specializing in performance creative for ecom brands. My work lives at the intersection of aesthetics and conversion — every cut, every hook, every second of pacing is built to do a job.<br><br>
+
+      I understand what makes people stop scrolling, keep watching, and click buy. From high-production paid ads to raw UGC-style content, I adapt to what the audience needs and what the funnel demands — and I move fast while doing it.
+
     </p>
+
   </div>
+
   <div class="about-right reveal">
+
     <div class="about-stats">
+
       <div class="stat-box">
-        <div class="stat-number">4+</div>
-        <div class="stat-label">Years Experience</div>
+
+        <div class="stat-number">3+</div>
+
+        <div class="stat-label">Years Editing</div>
+
       </div>
+
       <div class="stat-box">
+
         <div class="stat-number">50+</div>
+
         <div class="stat-label">Ads Produced</div>
+
       </div>
+
       <div class="stat-box">
+
         <div class="stat-number">3s</div>
+
         <div class="stat-label">Hook Obsession</div>
+
       </div>
+
       <div class="stat-box">
-        <div class="stat-number">∞</div>
-        <div class="stat-label">Attention to Detail</div>
+
+        <div class="stat-number">24h</div>
+
+        <div class="stat-label">Avg Turnaround</div>
+
       </div>
+
     </div>
+
   </div>
+
 </section>
+
+
+
+<!-- WHY ME -->
+
+<section class="why-me reveal" id="why">
+
+  <div class="section-header">
+
+    <span class="section-number">03</span>
+
+    <h2 class="section-title">Why I'm the Right Fit</h2>
+
+    <div class="section-line"></div>
+
+  </div>
+
+  <div class="why-grid">
+
+    <div class="why-item">
+
+      <div class="why-num">01</div>
+
+      <div class="why-title">I Think in Hooks, Not Just Cuts</div>
+
+      <div class="why-desc">Most editors execute briefs. I think about why the video needs to exist — what stops the scroll, what triggers curiosity, what earns the next second of attention. The strategy starts before the timeline opens.</div>
+
+    </div>
+
+    <div class="why-item">
+
+      <div class="why-num">02</div>
+
+      <div class="why-title">I Understand Ecom Creative Strategy</div>
+
+      <div class="why-desc">I know the difference between a brand video and a performance creative. I understand CTR, creative fatigue, iteration velocity, and what the algorithm rewards. I'm not just fast — I'm building toward results.</div>
+
+    </div>
+
+    <div class="why-item">
+
+      <div class="why-num">03</div>
+
+      <div class="why-title">Fast Output, No Excuses</div>
+
+      <div class="why-desc">Ecom moves fast. Creative testing never stops. I deliver first drafts in 24–48h, handle revisions same day, and maintain quality across multiple iterations without slowing down your pipeline.</div>
+
+    </div>
+
+    <div class="why-item">
+
+      <div class="why-num">04</div>
+
+      <div class="why-title">Versatile Across Formats & Styles</div>
+
+      <div class="why-desc">High-production paid ads. Raw UGC. Cinematic brand films. AI-assisted creatives. I adapt to your brand's voice and platform — Meta, TikTok, YouTube — and nail the native feel every time.</div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
 
 <!-- SKILLS -->
+
 <section class="skills reveal">
-  <div class="section-header" style="margin-bottom:2px">
-    <span class="section-number">03</span>
+
+  <div class="section-header">
+
+    <span class="section-number">04</span>
+
     <h2 class="section-title">What I Do</h2>
+
     <div class="section-line"></div>
+
   </div>
+
   <div class="skills-grid">
+
     <div class="skill-item">
-      <div class="skill-name">Paid Ads</div>
-      <div class="skill-desc">Meta, TikTok, YouTube. Hook-first editing built for paid performance. Every second earns its place.</div>
+
+      <div class="skill-name">Paid Ad Editing</div>
+
+      <div class="skill-desc">Meta, TikTok, YouTube. Hook-first editing built for paid performance. Every second earns its place or gets cut.</div>
+
     </div>
+
     <div class="skill-item">
+
       <div class="skill-name">UGC Editing</div>
-      <div class="skill-desc">Raw footage → polished, scroll-stopping ad. Captions, pacing, sound design — the full package.</div>
+
+      <div class="skill-desc">Raw footage → polished, scroll-stopping ad. Captions, pacing, sound design — the full package, native feel intact.</div>
+
     </div>
+
     <div class="skill-item">
+
       <div class="skill-name">AI-Assisted Creative</div>
-      <div class="skill-desc">Higgsfield, Midjourney, Runway — combining AI visuals with real footage for next-level creatives.</div>
+
+      <div class="skill-desc">Higgsfield, Midjourney, Runway — combining AI visuals with real footage for next-level creatives that don't look AI.</div>
+
     </div>
+
     <div class="skill-item">
-      <div class="skill-name">Brand Content</div>
-      <div class="skill-desc">Cinematic product videos, brand films, social content. Aesthetic-driven, on-brand every time.</div>
+
+      <div class="skill-name">Long Form Editing</div>
+
+      <div class="skill-desc">YouTube, brand films, documentary-style content. Retention-optimized pacing, clean structure, strong narrative arc.</div>
+
     </div>
+
     <div class="skill-item">
+
       <div class="skill-name">Motion Graphics</div>
-      <div class="skill-desc">Titles, captions, transitions, lower thirds. Clean motion that enhances without distracting.</div>
+
+      <div class="skill-desc">Titles, captions, transitions, lower thirds. Clean motion that enhances without distracting from the message.</div>
+
     </div>
+
     <div class="skill-item">
-      <div class="skill-name">Fast Turnaround</div>
-      <div class="skill-desc">Ecom moves fast. I do too. Revisions same-day, first drafts delivered on time, every time.</div>
+
+      <div class="skill-name">Creative Iteration</div>
+
+      <div class="skill-desc">I don't make one version and call it done. I build creative systems — hook variants, format tests, b-roll swaps — built for scaling.</div>
+
     </div>
+
   </div>
+
 </section>
+
+
 
 <!-- CONTACT -->
+
 <section class="contact reveal" id="contact">
+
   <div class="contact-pre">// Available for new projects</div>
+
   <h2 class="contact-title">Let's <span>Work</span><br>Together</h2>
-  <a href="mailto:your@email.com" class="contact-email">your@email.com</a>
+
+  <a href="mailto:korchybusiness@gmail.com" class="contact-email">korchybusiness@gmail.com</a>
+
   <div class="contact-socials">
-    <a href="#" class="social-link">Instagram</a>
-    <a href="#" class="social-link">LinkedIn</a>
-    <a href="#" class="social-link">TikTok</a>
+
+    <a href="https://instagram.com/slavicc.u" target="_blank" class="social-link">Instagram</a>
+
+    <a href="https://x.com/Korchy_" target="_blank" class="social-link">X (Twitter)</a>
+
   </div>
+
 </section>
 
+
+
 <footer>
+
   <p>© 2025 Uros Slavic</p>
-  <p>Video Editor — Ecom & Direct Response</p>
+
+  <p>Video Editor — Ecom & Performance Creative</p>
+
 </footer>
 
+
+
 <script>
+
   // Cursor
+
   const cursor = document.getElementById('cursor');
+
   const ring = document.getElementById('cursorRing');
+
   let mx = 0, my = 0, rx = 0, ry = 0;
+
   document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
   function animateCursor() {
-    cursor.style.left = mx + 'px';
-    cursor.style.top = my + 'px';
-    rx += (mx - rx) * 0.12;
-    ry += (my - ry) * 0.12;
-    ring.style.left = rx + 'px';
-    ring.style.top = ry + 'px';
+
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+
     requestAnimationFrame(animateCursor);
+
   }
+
   animateCursor();
 
+
+
   // Scroll reveal
+
   const reveals = document.querySelectorAll('.reveal');
+
   const observer = new IntersectionObserver(entries => {
+
     entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => entry.target.classList.add('visible'), i * 80);
-      }
+
+      if (entry.isIntersecting) setTimeout(() => entry.target.classList.add('visible'), i * 80);
+
     });
+
   }, { threshold: 0.1 });
+
   reveals.forEach(el => observer.observe(el));
+
+
+
+  // Modal
+
+  const modal = document.getElementById('videoModal');
+
+  const modalIframe = document.getElementById('modalIframe');
+
+  const modalTitle = document.getElementById('modalTitle');
+
+  const modalTag = document.getElementById('modalTag');
+
+
+
+  function openModal(title, tag, fileId) {
+
+    modalTitle.textContent = title;
+
+    modalTag.textContent = tag;
+
+    modalIframe.src = `https://drive.google.com/file/d/${fileId}/preview`;
+
+    modal.classList.add('active');
+
+    document.body.style.overflow = 'hidden';
+
+  }
+
+
+
+  function closeModal() {
+
+    modal.classList.remove('active');
+
+    modalIframe.src = '';
+
+    document.body.style.overflow = '';
+
+  }
+
+
+
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
 </script>
+
 </body>
+
 </html>
